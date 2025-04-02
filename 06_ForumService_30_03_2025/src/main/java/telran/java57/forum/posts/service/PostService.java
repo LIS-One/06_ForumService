@@ -1,8 +1,6 @@
 package telran.java57.forum.posts.service;
 
-import telran.java57.forum.posts.dto.NewPostDto;
-import telran.java57.forum.posts.dto.PostDto;
-import telran.java57.forum.posts.dto.UpdatePostDto;
+import telran.java57.forum.posts.dto.*;
 
 import java.util.List;
 
@@ -17,4 +15,12 @@ public interface PostService {
     PostDto removePost(String id);
 
     List<PostDto> findPostsByAuthor(String name);
+
+    PostDto addComment(String id, String author, NewCommentDto newCommentDto);
+
+    Iterable<PostDto> findPostsByTags(List<String> tags);
+
+    Iterable<PostDto> findPostsByPeriod(DatePeriodDto datePeriodDto);
+
+    void addLike(String id);
 }

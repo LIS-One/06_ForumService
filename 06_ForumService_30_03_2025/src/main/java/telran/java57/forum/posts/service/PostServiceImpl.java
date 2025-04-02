@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import telran.java57.forum.posts.dao.PostRepository;
-import telran.java57.forum.posts.dto.NewPostDto;
-import telran.java57.forum.posts.dto.PostDto;
-import telran.java57.forum.posts.dto.UpdatePostDto;
+import telran.java57.forum.posts.dto.*;
 import telran.java57.forum.posts.dto.exception.PostNotFoundException;
+import telran.java57.forum.posts.model.Comment;
 import telran.java57.forum.posts.model.Post;
 
 import java.util.List;
@@ -61,11 +60,41 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostDto> findPostsByAuthor(String name) {
 
-        return postRepository.findAll().stream()
-                .filter(post->name.equalsIgnoreCase(post.getAuthor()))
+        return postRepository.findPostsByAuthorIgnoreCase(name)
                 .map(post->modelMapper.map(post,PostDto.class))
                 .toList();
     }
+
+    @Override
+    public PostDto addComment(String id, String author, NewCommentDto newCommentDto) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
+        Comment comment = new Comment(newCommentDto.getMessage(), author);
+        post.addComment(comment);
+        postRepository.save(post);
+        return modelMapper.map(post,PostDto.class);
+    }
+
+    @Override
+    public Iterable<PostDto> findPostsByTags(List<String> tags) {
+        return postRepository.findPostsByTagsIgnoreCase(tags)
+                .map(post->modelMapper.map(post, PostDto.class))
+                .toList();
+    }
+
+    @Override
+    public Iterable<PostDto> findPostsByPeriod(DatePeriodDto datePeriodDto) {
+        return postRepository.findPostsByDateCreatedBetween(datePeriodDto.getDateFrom(),datePeriodDto.getDateTo())
+                .map(post->modelMapper.map(post, PostDto.class))
+                .toList();
+    }
+
+    @Override
+    public void addLike(String id) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
+        post.addLike();
+        postRepository.save(post);
+    }
+
 
 }
 
